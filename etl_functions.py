@@ -48,7 +48,7 @@ def query_select(conn):
     """
     cur = conn.cursor()
 
-    cur.execute("""SELECT * FROM guru99;""")
+    cur.execute("""SELECT * FROM daily_flights;""")
     rows = cur.fetchall()
     print(rows)
     for row in rows:
