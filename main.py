@@ -8,13 +8,15 @@ imports table in the db to avoid duplication
 """
 
 import etl_functions as etl
+import sys
 
 
-     db_file = 'database.db'
+db_file = 'database.db'
 to_load_path = 'files_to_load/To Load/'
- loaded_path = 'files_to_load/Loaded/'
-  table_name = 'house_sales_revisions'
+loaded_path = 'files_to_load/Loaded/'
+table_name = 'house_sales_revisions'
 import_table = 'file_imports'
+run = True
 
 # creates a connection to the db
 conn = etl.create_connection(db_file)
@@ -25,12 +27,20 @@ imported_files = etl.imports_query(conn)
 # creates a list of files to be loaded
 loading_files = etl.list_and_compare_files(to_load_path,imported_files)
 
+if len(loading_files) == 0:
+    run = False
+
+if run == False:
+    sys.exit('There are no new files to load')
+
+
 # Loops through files and writes them to db
-for file in loading_files:
-    etl.load_to_df(file)
-    etl.df_to_db(table_name)
-    df = df['import_time'] + df['source_file']
-    etl.df_to_db(import_table)
+if run == True:
+    for file in loading_files:
+        etl.load_to_df(file)
+        etl.df_to_db(table_name)
+        df = df['import_time'] + df['source_file']
+        etl.df_to_db(import_table)
 
 # Moves loaded files to the Loaded folder
 etl.move_to_loaded(loading_files)

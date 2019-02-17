@@ -82,6 +82,7 @@ def imports_query(conn):
 
 def load_to_df(csv_path):
 
+
     # load raw csv to a dataframe
     df = pd.read_csv(csv_path)
 
@@ -106,7 +107,6 @@ def load_to_df(csv_path):
     return df
 
 
-def df_to_db(table_name,conn):
+def df_to_db(table_name,conn,df):
 
-    global df
     df.to_sql(table_name, conn, if_exists="replace")
