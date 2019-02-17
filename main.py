@@ -19,8 +19,11 @@ import_table = 'file_imports'
 # creates a connection to the db
 conn = etl.create_connection(db_file)
 
+# reads db to read a list of loaded files
+imported_files = etl.imports_query(conn)
+
 # creates a list of files to be loaded
-loading_files = etl.list_and_compare_files(to_load_path,loaded_path)
+loading_files = etl.list_and_compare_files(to_load_path,imported_files)
 
 # Loops through files and writes them to db
 for file in loading_files:
@@ -33,7 +36,7 @@ for file in loading_files:
 etl.move_to_loaded(loading_files)
 
 # Runs sql query to make production table
-etl.query('queries/house_sales.sql')
+etl.query_executor('queries/house_sales.sql')
 
 
 

@@ -8,7 +8,9 @@ from sqlite3 import Error
 import pandas as pd
 import datetime
 
-def list_and_compare_files(to_load_path,loaded_path):
+
+
+def list_and_compare_files(to_load_path,imported_files):
     """
     Function to compare .csvs in loading directory and
     db imports table
@@ -17,12 +19,9 @@ def list_and_compare_files(to_load_path,loaded_path):
     # lists files to be loaded
     to_load_files = os.listdir(to_load_path)
 
-    # lists loaded files
-    loaded_files = os.listdir(loaded_path)
-
     # Checks for files that have already been loaded in to_load_path
     # This is in case a duplicate file is dropped, and returns list
-    return [i for i in to_load_files if i not in loaded_files]
+    return [i for i in to_load_files if i not in imported_files]
 
 
 def move_to_loaded(loading_files):
@@ -48,7 +47,7 @@ def create_connection(db_file):
     return None
 
 
-def query(conn,sql_path):
+def query_executor(conn,sql_path):
     """
 
     :param conn:
@@ -60,11 +59,25 @@ def query(conn,sql_path):
     fd = open(sql_path, 'r')
     sqlFile = fd.read()
     fd.close()
-    cur.execute(sqlFile)
-    #sql_commands = sqlFile.splt(';')
-    rows = cur.fetchall()
-    return rows
+    sql_commands = sqlFile.split(';')
+    for sql in sql_commands:
+        cur.execute(sql)
     cur.close()
+
+def imports_query(conn):
+    """
+
+    :param conn:
+    :param sql_path:
+    :return:
+    """
+
+    cur = conn.cursor()
+    cur.execute("""SELECT DISTINCT source_file from file_imports""")
+    rows = cur.fetchall()
+    cur.close()
+    return rows
+
 
 
 def load_to_df(csv_path):
@@ -95,4 +108,5 @@ def load_to_df(csv_path):
 
 def df_to_db(table_name,conn):
 
+    global df
     df.to_sql(table_name, conn, if_exists="replace")
