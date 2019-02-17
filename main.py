@@ -9,20 +9,31 @@ imports table in the db to avoid duplication
 
 import etl_functions as etl
 
-conn = etl.create_connection('database.db')
+
+     db_file = 'database.db'
+to_load_path = 'files_to_load/To Load/'
+ loaded_path = 'files_to_load/Loaded/'
+  table_name = 'house_sales_revisions'
+import_table = 'file_imports'
+
+# creates a connection to the db
+conn = etl.create_connection(db_file)
+
+# creates a list of files to be loaded
+loading_files = etl.list_and_compare_files(to_load_path,loaded_path)
+
+# Loops through files and writes them to db
+for file in loading_files:
+    etl.load_to_df(file)
+    etl.df_to_db(table_name)
+    df = df['import_time'] + df['source_file']
+    etl.df_to_db(import_table)
+
+# Moves loaded files to the Loaded folder
+etl.move_to_loaded(loading_files)
+
+# Runs sql query to make production table
+etl.query('queries/house_sales.sql')
 
 
-#etl.query(conn,'query.sql')
-#etl.query_insert(conn)
-etl.query_select(conn)
-import pandas as pd
 
-csv_path = 'Sacramentorealestatetransactions.csv'
-
-#df = pd.read_csv(csv_path)
-
-#print(df.head())
-
-#df.to_sql("daily_flights", conn, if_exists="replace")
-#cur.close()
-conn.close()

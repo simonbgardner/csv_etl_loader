@@ -5,6 +5,8 @@
 import os
 import sqlite3
 from sqlite3 import Error
+import pandas as pd
+import datetime
 
 def list_and_compare_files(to_load_path,loaded_path):
     """
@@ -28,7 +30,6 @@ def move_to_loaded(loading_files):
     Function moves loaded files to the
     files_to_load/Loaded directory
     """
-
     for file in loading_files:
         os.rename("files_to_load/To Load/" + 'file', "files_to_load/Loaded/" + 'file')
 
@@ -66,32 +67,32 @@ def query(conn,sql_path):
     cur.close()
 
 
-def query_select(conn):
-    """
-    Query all rows in the tasks table
-    :param conn: the Connection object
-    :return:
-    """
-    cur = conn.cursor()
+def load_to_df(csv_path):
 
-    cur.execute("""SELECT * FROM daily_flights;""")
-    rows = cur.fetchall()
-    cur.close()
-    return rows
+    # load raw csv to a dataframe
+    df = pd.read_csv(csv_path)
+
+    # creates a _key
+    df['key'] =  df["street"].map(str) + df["sq__ft"].map(str)  + df["sale_date"].map(str) + df["price"].map(str)
+
+    # sets the _key as the index
+    df.set_index('key', inplace=True, verify_integrity= False)
+
+    # deduplicates data based on _key
+    df = df.groupby('key').first().reset_index()
+
+    # Adds the _key to the columns for importing to db
+    df['_key'] = df['key']
+
+    # Adds source file
+    df['source_file'] = csv_path
+
+    # Adds import time
+    df['import_time'] = datetime.datetime.now()
+
+    return df
 
 
-def query_insert(conn):
-    """
-    Query all rows in the tasks table
-    :param conn: the Connection object
-    :return:
-    """
-    cur = conn.cursor()
-    cur.execute("""INSERT
-        INTO
-        guru99(Id, Name) VALUES(1233, 'Simfon');""")
-    cur.close()
+def df_to_db(table_name,conn):
 
-def close_connection(db_file):
-
-    return None
+    df.to_sql(table_name, conn, if_exists="replace")
