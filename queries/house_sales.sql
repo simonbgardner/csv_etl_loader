@@ -39,6 +39,7 @@ SELECT
 FROM house_sales_revisions
 
 
+
 JOIN
 (
     SELECT
