@@ -1,7 +1,28 @@
+DROP TABLE IF EXISTS house_sales;
+
+
+CREATE TABLE house_sales(
+ 
+    _key        TEXT NOT NULL,
+    street      TEXT,
+    city        TEXT,
+    zip         TEXT,
+    state       TEXT,   
+    beds        INT,
+    baths       INT,
+    sq__ft      INT,
+    type        TEXT,
+    sale_date   TEXT,
+    price       REAL,
+    latitude    REAL,
+    longitude   REAL
+);
+
+
 
 SELECT
 
-    _key
+    _key,
     street,
     city,
     zip,
